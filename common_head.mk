@@ -13,9 +13,11 @@ UNAME_OS=$(shell uname -s)
 # lots of people use .cpp instead.
 CXX_EXT ?= cc
 
+ASM_SRC = $(filter %.S,$(SRC))
 C_SRC = $(filter %.c,$(SRC))
 CXX_SRC = $(filter %.$(CXX_EXT),$(SRC))
 
+CUSTOM_ASM_SRC = $(filter %.S,$(CUSTOM_SRC))
 CUSTOM_C_SRC = $(filter %.c,$(CUSTOM_SRC))
 CUSTOM_CXX_SRC = $(filter %.$(CXX_EXT),$(CUSTOM_SRC))
 
@@ -32,6 +34,10 @@ else
 OBJECT_FILE_SUFFIX ?= o
 ASMNAME ?= lst
 endif
+ASM_ASM ?= $(ASM_SRC:%.S=%.$(ASMNAME))
+ASM_OBJ ?= $(ASM_SRC:%.S=%.$(OBJECT_FILE_SUFFIX))
+CUSTOM_ASM_OBJ ?= $(CUSTOM_ASM_SRC:%.S=%.$(OBJECT_FILE_SUFFIX))
+ASM_DEPS ?= $(ASM_SRC:%.S=%.d)
 
 C_ASM ?= $(C_SRC:%.c=%.$(ASMNAME))
 C_OBJ ?= $(C_SRC:%.c=%.$(OBJECT_FILE_SUFFIX))
@@ -43,9 +49,9 @@ CXX_OBJ ?= $(CXX_SRC:%.$(CXX_EXT)=%.$(OBJECT_FILE_SUFFIX))
 CUSTOM_CXX_OBJ ?= $(CUSTOM_CXX_SRC:%.c=%.$(OBJECT_FILE_SUFFIX))
 CXX_DEPS ?= $(CXX_SRC:%.$(CXX_EXT)=%.d)
 
-ASM ?= $(C_ASM) $(CXX_ASM)
-OBJ ?= $(C_OBJ) $(CXX_OBJ)
-DEPS ?= $(C_DEPS) $(CXX_DEPS)
+ASM ?= $(C_ASM) $(CXX_ASM) $(ASM_ASM)
+OBJ ?= $(C_OBJ) $(CXX_OBJ) $(ASM_OBJ)
+DEPS ?= $(C_DEPS) $(CXX_DEPS) $(ASM_DSEPS)
 
 ifeq ("$(UNAME_OS)","Darwin")
 CLANGIN = 22

@@ -99,6 +99,29 @@ endif
 # Generate object files; output assembly listings alongside.  esden
 # tells me that it's hard to get a real GCC on OS X, so avoid the
 # worst of the non-portability.
+$(CUSTOM_ASM_OBJ) : %.$(OBJECT_FILE_SUFFIX) : %.S
+	@echo CC \(CUSTOM\) $(notdir $<)
+ifdef USE_DEPS
+	$(Q)$(CC) -MM -MT $@ -MT $(basename $(basename $@)).d $(CUSTOM_CFLAGS) $< -MF $(basename $(basename $@)).d
+endif
+ifdef CLANGIN
+	$(Q)$(CC) $(CUSTOM_CFLAGS) -c $< -o $@
+else
+	$(Q)$(CC) $(CUSTOM_CFLAGS) $(ASMFLAGS)$(@:%.$(OBJECT_FILE_SUFFIX)=%.$(ASMNAME)) -c $< -o $@
+endif
+
+$(filter-out $(CUSTOM_ASM_OBJ), $(ASM_OBJ)) : %.$(OBJECT_FILE_SUFFIX) : %.S # $(C_HDR)
+	@echo CC $(notdir $<)
+ifdef USE_DEPS
+	$(Q)$(CC) -MM -MT $@ -MT $(basename $(basename $@)).d $(CFLAGS) $< -MF $(basename $(basename $@)).d
+endif
+ifdef CLANGIN
+	$(Q)$(CC) $(CFLAGS) -c $< -o $@
+else
+	$(Q)$(CC) $(CFLAGS) $(ASMFLAGS)$(@:%.$(OBJECT_FILE_SUFFIX)=%.$(ASMNAME)) -c $< -o $@
+endif
+
+
 $(CUSTOM_C_OBJ) : %.$(OBJECT_FILE_SUFFIX) : %.c
 	@echo CC \(CUSTOM\) $(notdir $<)
 ifdef USE_DEPS
